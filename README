@@ -1,15 +1,12 @@
-1. Usando Appia e tomando como base o a implementaÁ„o da composiÁ„o de impress„o, implemente os algoritmos da composiÁ„o de tratamento 
-de trabalhos do CapÌtulo 1 do livro. Para simplificar, suponha que o tratamento de trabalho equivale a impress„o do mesmo e que a 
-transformaÁ„o equivale a mudar todas as letras para mai˙sculas.
+Ôªø1. Usando Appia e tomando como base o a implementa√ß√£o da composis√£o de impress√£o, implemente os algoritmos da composi√ß√£o de tratamento de trabalhos do Cap√≠tulo 1 do livro. Para simplificar, suponha que o tratamento de trabalho equivale a impress√£o do mesmo e que a transforma√ß√£o equivale a mudar todas as letras para mai√∫sculas.
 
 	Execute o arquivo "Example"
 
-2. Estude o funcionamento da implementaÁ„o de enlaces perda-justa presente no Appia (net.sf.appia.protocols.udpsimple) e crie um programa 
-principal onde dois processos trocam mensagens de texto.
+2. Estude o funcionamento da implementa√ß√£o de enlaces perda-justa presente no Appia (net.sf.appia.protocols.udpsimple) e crie um programa principal onde dois processos trocam mensagens de texto.
 
-	Execute o "ExampleReceiver" que ficar· esperando receber uma mensagem.
+	Execute o "ExampleReceiver" que ficar√° esperando receber uma mensagem.
 	Execute o "ExampleSender" que espera uma mensagem ser digitada e a envia.
 
-3. Implemente uma camada que corresponde a enlaces perfeitos usando a composiÁ„o de protocolos sugerida no livro (UDP, Algoritmos 2.1 e 2.2). Teste sua implementaÁ„o com o programa de troca de mensagens de texto do ExercÌcio 2.
+3. Implemente uma camada que corresponde a enlaces perfeitos usando a composi√ß√£o de protocolos sugerida no livro (UDP, Algoritmos 2.1 e 2.2). Teste sua implementa√ß√£o com o programa de troca de mensagens de texto do Exerc√≠cio 2.
 
-4. Proponha uma otimizaÁ„o para melhorar o desempenho da implementaÁ„o do ExecÌcio 3.
+4. Proponha uma otimiza√ß√£o para melhorar o desempenho da implementa√ß√£o do Exec√≠cio 3.
