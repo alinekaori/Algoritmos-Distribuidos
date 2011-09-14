@@ -1,0 +1,15 @@
+1. Usando Appia e tomando como base o a implementação da composição de impressão, implemente os algoritmos da composição de tratamento 
+de trabalhos do Capítulo 1 do livro. Para simplificar, suponha que o tratamento de trabalho equivale a impressão do mesmo e que a 
+transformação equivale a mudar todas as letras para maiúsculas.
+
+	Execute o arquivo "Example"
+
+2. Estude o funcionamento da implementação de enlaces perda-justa presente no Appia (net.sf.appia.protocols.udpsimple) e crie um programa 
+principal onde dois processos trocam mensagens de texto.
+
+	Execute o "ExampleReceiver" que ficará esperando receber uma mensagem.
+	Execute o "ExampleSender" que espera uma mensagem ser digitada e a envia.
+
+3. Implemente uma camada que corresponde a enlaces perfeitos usando a composição de protocolos sugerida no livro (UDP, Algoritmos 2.1 e 2.2). Teste sua implementação com o programa de troca de mensagens de texto do Exercício 2.
+
+4. Proponha uma otimização para melhorar o desempenho da implementação do Execício 3.
