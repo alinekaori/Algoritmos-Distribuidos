@@ -1,4 +1,4 @@
-﻿1. Usando Appia e tomando como base o a implementação da composisão de impressão, implemente os algoritmos da composição de tratamento de trabalhos do Capítulo 1 do livro. Para simplificar, suponha que o tratamento de trabalho equivale a impressão do mesmo e que a transformação equivale a mudar todas as letras para maiúsculas.
+﻿1. Usando Appia e tomando como base a implementação da composisão de impressão, implemente os algoritmos da composição de tratamento de trabalhos do Capítulo 1 do livro. Para simplificar, suponha que o tratamento de trabalho equivale a impressão do mesmo e que a transformação equivale a mudar todas as letras para maiúsculas.
 
 	Execute o arquivo "Example"
 
@@ -9,4 +9,16 @@
 
 3. Implemente uma camada que corresponde a enlaces perfeitos usando a composição de protocolos sugerida no livro (UDP, Algoritmos 2.1 e 2.2). Teste sua implementação com o programa de troca de mensagens de texto do Exercício 2.
 
+	É necessário informar o id do processo ao executar "MainApplication" e "ReceiverApplication". Neste projeto, apenas os ids 0 ou 1 podem ser informados, porém deve-se manter sempre os processos com ids diferentes. O id deve ser passado como parâmetro ao executar cada um dos arquivos.
+	
+	Para executar no Eclipse:
+		- Propriedades do projeto (alt + enter após selecionar a raiz do projeto) > Run/Debug Settings
+		- Crie 2 configurações diferentes, uma para a Main, outra para o Receiver:
+			- New... > Java Application
+			- Na primeira aba, preencha o campo "Main class:" com a "MainApplication"
+			- Na segunda aba, informe em "Program arguments" o id escolhido para a "Main Application" (valores 0 ou 1)
+			- Clique em OK
+			- Faça o mesmo para a "ReceiverApplication", informando o outro id
+		- As duas opções de "Run" estarão agora disponíveis. Basta executar as duas para testar o exercício.
+	
 4. Proponha uma otimização para melhorar o desempenho da implementação do Execício 3.
