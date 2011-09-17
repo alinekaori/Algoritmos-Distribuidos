@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public class SimpleMessage implements Serializable{
   
+  private static final long serialVersionUID = -7930361006470891430L;
   private int id;
   private String string;
   

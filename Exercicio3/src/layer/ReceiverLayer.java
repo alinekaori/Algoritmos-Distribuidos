@@ -3,7 +3,7 @@ package layer;
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelInit;
-import session.PerfectLinkSession;
+import session.ReceiverSession;
 import event.DeliverEvent;
 import event.SendEvent;
 
@@ -13,13 +13,13 @@ import event.SendEvent;
  * 
  * @author akt & kcg
  */
-public class PerfectLinkLayer extends Layer {
+public class ReceiverLayer extends Layer {
 	
   /** Creates a new instance of PrintApplicationLayer */
-  public PerfectLinkLayer() {
+  public ReceiverLayer() {
     /* events that the protocol will create */
     evProvide = new Class[1];
-    evProvide[0] = SendEvent.class;
+    evProvide[0] = DeliverEvent.class;
 
     /*
      * events that the protocol requires to work This is a subset of the
@@ -29,11 +29,11 @@ public class PerfectLinkLayer extends Layer {
 
     /* events that the protocol will accept */
     evAccept = new Class[2];
-    evAccept[0] = DeliverEvent.class;
+    evAccept[0] = SendEvent.class;
     evAccept[1] = ChannelInit.class;
   }
 
   public Session createSession() {
-    return new PerfectLinkSession(this);
+    return new ReceiverSession(this);
   }
 }

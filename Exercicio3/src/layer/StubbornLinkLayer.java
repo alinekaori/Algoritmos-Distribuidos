@@ -1,11 +1,11 @@
 package layer;
 
-import event.DeliverEvent;
-import event.SendEvent;
-import session.StubbornLinkSession;
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelInit;
+import session.StubbornLinkSession;
+import event.DeliverEvent;
+import event.SendEvent;
 
 
 /**
@@ -18,8 +18,7 @@ public class StubbornLinkLayer extends Layer {
   /** Creates a new instance of PrintApplicationLayer */
   public StubbornLinkLayer() {
     /* events that the protocol will create */
-    evProvide = new Class[1];
-    evProvide[0] = SendEvent.class;
+    evProvide = new Class[0];
 
     /*
      * events that the protocol requires to work This is a subset of the
@@ -28,12 +27,14 @@ public class StubbornLinkLayer extends Layer {
     evRequire = new Class[0];
 
     /* events that the protocol will accept */
-    evAccept = new Class[2];
+    evAccept = new Class[3];
     evAccept[0] = DeliverEvent.class;
     evAccept[1] = ChannelInit.class;
+    evAccept[2] = SendEvent.class;
   }
 
   public Session createSession() {
     return new StubbornLinkSession(this);
   }
+
 }

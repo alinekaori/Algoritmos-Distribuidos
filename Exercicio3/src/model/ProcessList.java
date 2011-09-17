@@ -26,4 +26,13 @@ public class ProcessList extends ArrayList<CustomProcess> {
 		return null;
 	}
 
+	public CustomProcess getOther(){
+		for( CustomProcess p : this ){
+			if( !p.isSelf() ){
+				return p;
+			}
+		}
+		
+		return null;
+	}
 }

@@ -63,9 +63,7 @@ public class StubbornLinkSession extends Session {
 		super(layer);
 	}
 
-	public void handle(Event event) {
-		System.out.println();
-		
+	public void handle(Event event) {		
 		if (event instanceof ChannelInit)
 			handleChannelInit((ChannelInit) event);
 		else if (event instanceof SendEvent)
@@ -76,7 +74,7 @@ public class StubbornLinkSession extends Session {
 
 	private ProcessList processes;
 	private ArrayList<SimpleMessage> sent = null;
-	private Timer timer = null;
+	private Timer timer = new Timer();
 	private Channel channel = null;
 
 	private void handleChannelInit(ChannelInit init) {
@@ -86,7 +84,8 @@ public class StubbornLinkSession extends Session {
 			
 			@Override
 			public void run() {
-				sendMessage();
+				if( !sent.isEmpty() )
+					sendMessage();
 			}
 		}, 0, 5000);
 		
@@ -99,9 +98,6 @@ public class StubbornLinkSession extends Session {
 
 
 		try {
-		      // sends this event to open a socket in the layer that is used has perfect
-		      // point to point
-		      // channels or unreliable point to point channels.
 		      RegisterSocketEvent rse = new RegisterSocketEvent(init.getChannel(),
 		          Direction.DOWN, this);
 		      
@@ -114,12 +110,14 @@ public class StubbornLinkSession extends Session {
 		    } catch (AppiaEventException e1) {
 		      e1.printStackTrace();
 		    }
-		    System.out.println("Channel is open.");
 	}
 
 	private void handleSendEvent(SendEvent event) {
 		SimpleMessage message = (SimpleMessage) event.getMessage().peekObject();
-		sent.add(message);
+		
+		if( event.isOriginalMessage() ){
+			sent.add(message);
+		}
 		
 		try {
 			event.go();
@@ -129,39 +127,31 @@ public class StubbornLinkSession extends Session {
 	}
 	
 	private void sendMessage() {
-		
+		SendEvent event = null;
+		Message m = null;
+
 		for( SimpleMessage message : sent ){
-			SendEvent event = new SendEvent();
 			
+			event = new SendEvent();
+			event.isOriginalMessage(false);
 			
+			m = new Message();
+			m.pushObject(message);
+			event.setMessage(m);
+			event.setSourceProcess(processes.getSelf());
+			event.setDestProcess(processes.getOther());
 			
 			try {
-				event.init();
 				event.asyncGo(channel, Direction.DOWN);
 			} catch (AppiaEventException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
 	private void handleDeliverEvent(DeliverEvent event) {
-		SimpleMessage s = (SimpleMessage)event.getMessage().popObject();
-		String receivedMessage = s.getString();
-		System.out.println("[Receiver: received message: " + receivedMessage + "]");
-		DeliverEvent confirmationEvent = new DeliverEvent();
-		confirmationEvent.setChannel(event.getChannel());
-		confirmationEvent.setId(event.getId());
-		Message m = new Message();
-		m.pushObject(s);
-		confirmationEvent.setMessage(m);
-		confirmationEvent.setDir(Direction.DOWN);
-		confirmationEvent.setSourceSession(this);
-		confirmationEvent.setSendSource(processes[1]);
-		confirmationEvent.setDest(processes[0]);
 		try {
-			confirmationEvent.init();
-			confirmationEvent.go();
+			event.go();
 		} catch (AppiaEventException e) {
 			e.printStackTrace();
 		}

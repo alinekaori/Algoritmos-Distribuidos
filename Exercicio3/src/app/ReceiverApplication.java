@@ -1,8 +1,7 @@
 package app;
 
 
-import layer.PerfectLinkLayer;
-import layer.StubbornLinkLayer;
+import layer.ReceiverLayer;
 import model.CustomProcess;
 import model.ProcessList;
 import net.sf.appia.core.Appia;
@@ -14,15 +13,14 @@ import net.sf.appia.core.ChannelCursor;
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.QoS;
 import net.sf.appia.protocols.udpsimple.UdpSimpleLayer;
-import session.PerfectLinkSession;
-import session.StubbornLinkSession;
+import session.ReceiverSession;
 
 /**
  * This is the MAIN class to run the Print protocols.
  * 
  * @author akt & kcg
  */
-public class MainApplication {
+public class ReceiverApplication {
 
 	private static int PROC_ID_SENDER = 0;
 	private static int PROC_ID_RECEIVER = 1;
@@ -39,7 +37,7 @@ public class MainApplication {
 		}
 	    
 	    /* Create layers and put them on a array */
-	    Layer[] qos = {new UdpSimpleLayer(), new StubbornLinkLayer(), new PerfectLinkLayer()};
+	    Layer[] qos = {new UdpSimpleLayer(), new ReceiverLayer()};
 
 	    /* Create a QoS */
 	    QoS myQoS = null;
@@ -54,20 +52,14 @@ public class MainApplication {
 	    Channel channel = myQoS
 	        .createUnboundChannel("UDP Simple Channel");
 	    
-	    StubbornLinkSession sls = (StubbornLinkSession) qos[qos.length - 2]
+	    ReceiverSession rs = (ReceiverSession) qos[qos.length - 1]
 	        .createSession();
-	    sls.init(buildProcessSet(args[0]));
-	    
-	    PerfectLinkSession pls = (PerfectLinkSession) qos[qos.length - 1]
-	        .createSession();
-	    pls.init(buildProcessSet(args[0]));
+	    rs.init(buildProcessSet(args[0]));
 	    ChannelCursor cc = channel.getCursor();
 	    
 	    try {
 	      cc.top();
-	      cc.setSession(pls);
-	      cc.down();
-	      cc.setSession(sls);
+	      cc.setSession(rs);
 	    } catch (AppiaCursorException ex) {
 	      System.err.println("Unexpected exception in main. Type code:" + ex.type);
 	      System.exit(1);

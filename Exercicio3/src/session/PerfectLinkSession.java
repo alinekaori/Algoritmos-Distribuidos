@@ -3,10 +3,9 @@ package session;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.util.ArrayList;
 
-import model.CustomProcess;
+import model.ProcessList;
 import model.SimpleMessage;
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
@@ -16,7 +15,6 @@ import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelInit;
 import net.sf.appia.core.message.Message;
-import net.sf.appia.protocols.common.RegisterSocketEvent;
 import event.DeliverEvent;
 import event.SendEvent;
 
@@ -33,16 +31,15 @@ public class PerfectLinkSession extends Session {
 	}
 
 	public void handle(Event event) {
-		System.out.println();
-
 		if (event instanceof ChannelInit)
 			handleChannelInit((ChannelInit) event);
 		else if (event instanceof DeliverEvent)
-			handleReceiverConfirm((DeliverEvent) event);
+			handleDeliverEvent((DeliverEvent) event);
 	}
 
 	private MessageReader reader = null;
-	private CustomProcess[] processes;
+	private ProcessList processes;
+	private ArrayList<SimpleMessage> delivered = null;
 
 	private void handleChannelInit(ChannelInit init) {
 		try {
@@ -54,25 +51,27 @@ public class PerfectLinkSession extends Session {
 		if (reader == null)
 			reader = new MessageReader(init.getChannel());
 		
-		
-		try {
-		      // sends this event to open a socket in the layer that is used has perfect
-		      // point to point
-		      // channels or unreliable point to point channels.
-		      RegisterSocketEvent rse = new RegisterSocketEvent(init.getChannel(),
-		          Direction.DOWN, this);
-		      //rse.port = ((InetSocketAddress) addresses[0]).getPort();
-		      //rse.localHost = ((InetSocketAddress)addresses[0]).getAddress();
-		      rse.go();
-		    } catch (AppiaEventException e1) {
-		      e1.printStackTrace();
-		    }
-		    System.out.println("Channel is open.");
+		delivered = new ArrayList<SimpleMessage>();
 	}
-
-	private void handleReceiverConfirm(DeliverEvent conf) {
-		System.out.println("[Sender: received confirmation of request "
-						+ ((SimpleMessage)conf.getMessage().popObject()).getId() + "]");
+	
+	private void handleDeliverEvent(DeliverEvent conf) {
+		SimpleMessage message = (SimpleMessage)conf.getMessage().popObject();
+		boolean messageDelivered = false;
+		
+		for(SimpleMessage m : delivered){
+			if( message.getId() == m.getId() ){
+				messageDelivered = true;
+				break;
+			}
+		}
+		
+		if(!messageDelivered){
+			System.out.println("[Deliver: message delivered: "
+					+ message.getId() + "]");
+			
+			delivered.add(message);
+		}
+		
 		try {
 			conf.go();
 		} catch (AppiaEventException ex) {
@@ -106,14 +105,14 @@ public class PerfectLinkSession extends Session {
 					String s = stdin.readLine();
 					
 					SendEvent request = new SendEvent();
-					request.setId(rid);
+					request.isOriginalMessage(true);
 					
 					Message m = new Message();
 					m.pushObject(new SimpleMessage(rid, s));
 					request.setMessage(m);
-					//request.setDest(addresses[1]);
-					//request.setSendSource(addresses[0]);
-					System.out.println("sending... " );
+					request.setDestProcess(processes.getOther());
+					request.setSourceProcess(processes.getSelf());
+					
 					request.asyncGo(channel, Direction.DOWN);
 				} catch (AppiaEventException ex) {
 					ex.printStackTrace();
@@ -135,7 +134,7 @@ public class PerfectLinkSession extends Session {
 		}
 	}
 
-	public void init(CustomProcess[] processes) {
+	public void init(ProcessList processes) {
 		this.processes = processes;
 	}
 }
