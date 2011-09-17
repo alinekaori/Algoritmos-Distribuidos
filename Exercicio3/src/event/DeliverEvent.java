@@ -1,7 +1,6 @@
 package event;
 
 import model.CustomProcess;
-import model.SimpleMessage;
 import net.sf.appia.core.events.SendableEvent;
 
 
@@ -34,12 +33,4 @@ public class DeliverEvent extends SendableEvent {
 		source = process.getCompleteAddress();
 	}
 
-	public int getId() {
-		String procId = Integer.toString(processSource.getId());
-		
-		SimpleMessage message = (SimpleMessage) getMessage().peekObject();
-		String messageId = Integer.toString(message.getId());
-		
-		return Integer.parseInt(procId + messageId);
-	}
 }

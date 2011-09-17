@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import model.ProcessList;
-import model.SimpleMessage;
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
 import net.sf.appia.core.Direction;
@@ -39,7 +38,7 @@ public class PerfectLinkSession extends Session {
 
 	private MessageReader reader = null;
 	private ProcessList processes;
-	private ArrayList<SimpleMessage> delivered = null;
+	private ArrayList<Message> delivered = null;
 
 	private void handleChannelInit(ChannelInit init) {
 		try {
@@ -51,15 +50,15 @@ public class PerfectLinkSession extends Session {
 		if (reader == null)
 			reader = new MessageReader(init.getChannel());
 		
-		delivered = new ArrayList<SimpleMessage>();
+		delivered = new ArrayList<Message>();
 	}
 	
 	private void handleDeliverEvent(DeliverEvent conf) {
-		SimpleMessage message = (SimpleMessage)conf.getMessage().popObject();
+		Message message = conf.getMessage();
 		boolean messageDelivered = false;
 		
-		for(SimpleMessage m : delivered){
-			if( message.getId() == m.getId() ){
+		for(Message m : delivered){
+			if( message.peekInt() == m.peekInt() ){
 				messageDelivered = true;
 				break;
 			}
@@ -67,7 +66,7 @@ public class PerfectLinkSession extends Session {
 		
 		if(!messageDelivered){
 			System.out.println("[Deliver: message delivered: "
-					+ message.getId() + "]");
+					+ message.peekInt() + "]");
 			
 			delivered.add(message);
 		}
@@ -108,8 +107,10 @@ public class PerfectLinkSession extends Session {
 					request.isOriginalMessage(true);
 					
 					Message m = new Message();
-					m.pushObject(new SimpleMessage(rid, s));
+					m.pushString(s);
+					m.pushInt(rid);
 					request.setMessage(m);
+					
 					request.setDestProcess(processes.getOther());
 					request.setSourceProcess(processes.getSelf());
 					

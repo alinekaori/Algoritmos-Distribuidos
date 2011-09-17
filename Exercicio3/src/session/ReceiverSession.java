@@ -4,7 +4,6 @@ package session;
 import java.net.InetSocketAddress;
 
 import model.ProcessList;
-import model.SimpleMessage;
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Direction;
 import net.sf.appia.core.Event;
@@ -60,16 +59,16 @@ public class ReceiverSession extends Session {
 	}
 	
 	private void handleSendEvent(SendEvent conf) {
-		SimpleMessage message = (SimpleMessage)conf.getMessage().popObject();
+		Message message = conf.getMessage();
+		int id = message.popInt();
 		
 		System.out.println("[Message received: "
-						+ message.getString() + "]");
+						+ message.peekString() + "]");
+		
+		message.pushInt(id);
 		
 		DeliverEvent event = new DeliverEvent();
-		
-		Message m = new Message();
-		m.pushObject(message);
-		event.setMessage(m);
+		event.setMessage(message);
 		event.setDestProcess(processes.getOther());
 		event.setSourceProcess(processes.getSelf());
 		event.setChannel(conf.getChannel());
@@ -77,8 +76,6 @@ public class ReceiverSession extends Session {
 		event.setSourceSession(this);
 		
 		try {
-			//conf.go();
-			
 			event.init();
 			event.go();
 		} catch (AppiaEventException ex) {

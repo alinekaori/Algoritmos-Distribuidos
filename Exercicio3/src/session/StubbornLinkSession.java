@@ -38,7 +38,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import model.ProcessList;
-import model.SimpleMessage;
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
 import net.sf.appia.core.Direction;
@@ -73,19 +72,20 @@ public class StubbornLinkSession extends Session {
 	}
 
 	private ProcessList processes;
-	private ArrayList<SimpleMessage> sent = null;
+	private ArrayList<Message> sent = null;
 	private Timer timer = new Timer();
 	private Channel channel = null;
 
 	private void handleChannelInit(ChannelInit init) {
 		channel = init.getChannel();
-		sent = new ArrayList<SimpleMessage>();
+		sent = new ArrayList<Message>();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
 			@Override
 			public void run() {
-				if( !sent.isEmpty() )
+				if( !sent.isEmpty() ){
 					sendMessage();
+				}
 			}
 		}, 0, 5000);
 		
@@ -113,37 +113,33 @@ public class StubbornLinkSession extends Session {
 	}
 
 	private void handleSendEvent(SendEvent event) {
-		SimpleMessage message = (SimpleMessage) event.getMessage().peekObject();
-		
-		if( event.isOriginalMessage() ){
-			sent.add(message);
-		}
+		Message message = event.getMessage();
 		
 		try {
+			if( event.isOriginalMessage() ){
+				sent.add((Message) message.clone());
+			}
+			
 			event.go();
-		} catch (AppiaEventException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	private void sendMessage() {
 		SendEvent event = null;
-		Message m = null;
 
-		for( SimpleMessage message : sent ){
-			
+		for( Message message : sent ){
 			event = new SendEvent();
 			event.isOriginalMessage(false);
 			
-			m = new Message();
-			m.pushObject(message);
-			event.setMessage(m);
 			event.setSourceProcess(processes.getSelf());
 			event.setDestProcess(processes.getOther());
 			
 			try {
+				event.setMessage((Message)message.clone());
 				event.asyncGo(channel, Direction.DOWN);
-			} catch (AppiaEventException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
