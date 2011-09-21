@@ -22,3 +22,16 @@
 		- As duas opções de "Run" estarão agora disponíveis. Basta executar as duas para testar o exercício.
 	
 4. Proponha uma otimização para melhorar o desempenho da implementação do Execício 3.
+	- Não enviar as mensagens já recebidas novamente pela rede. Apenas enviar a informação para a camada superior.
+	
+5. Como podemos, a partir da ordem parcial dada pela relação de precedência causal, criar uma ordenação total de eventos em um sistema distribuído? Quais são as propriedades mais importantes desta ordenação total?
+	- * -
+	
+6. Faz sentido tentar implementar, usando Appia, as abstrações de detector de falhas perfeito como apresentadas em sala de aula? Por quê?
+	Resposta 1:
+	- Não. O detector de falhas perfeito considera que se tem um sistema síncrono e, portanto, existe um tempo limite (delta) fixo para a execução de um processo. Considerando que o Appia envia processos pela rede (o sistema não é síncrono) e se tem um tempo variável - e muitas vezes grande - para que as mensagens sejam entregues pode-se detectar que um processo é falho, mesmo ele estando apenas demorando para responder. 
+	
+7. É fundamental para o funcionamento do detector de falhas perfeito eventual o aumento do tempo de espera por Delta a cada falsa suspeita?
+	- * -
+	Parar o aumento do tempo?
+	Sistemas síncronos, não?
