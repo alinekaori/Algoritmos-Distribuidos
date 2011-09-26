@@ -30,8 +30,10 @@
 6. Faz sentido tentar implementar, usando Appia, as abstrações de detector de falhas perfeito como apresentadas em sala de aula? Por quê?
 	Resposta 1:
 	- Não. O detector de falhas perfeito considera que se tem um sistema síncrono e, portanto, existe um tempo limite (delta) fixo para a execução de um processo. Considerando que o Appia envia processos pela rede (o sistema não é síncrono) e se tem um tempo variável - e muitas vezes grande - para que as mensagens sejam entregues pode-se detectar que um processo é falho, mesmo ele estando apenas demorando para responder. 
+
+7. Implemente uma camada no Appia que corresponda ao Algoritmo 2.9 (Elect Lower Epoch) do livro. Crie uma aplicação que exiba na tela o líder atual. Demostre a sua implementação usando máquinas em rede.
 	
-7. É fundamental para o funcionamento do detector de falhas perfeito eventual o aumento do tempo de espera por Delta a cada falsa suspeita?
+8. É fundamental para o funcionamento do detector de falhas perfeito eventual o aumento do tempo de espera por Delta a cada falsa suspeita?
 	- * -
 	Parar o aumento do tempo?
 	Sistemas síncronos, não?
