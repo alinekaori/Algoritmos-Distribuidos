@@ -85,12 +85,10 @@ public class SendReceiveApplicationSession extends Session {
 
 	private void handleSenderRequest(SenderRequestEvent conf) {
 		Message message = conf.getMessage();
-		int id = message.popInt();
 		
+		SimpleMessage simpleMessage = (SimpleMessage) message.peekObject();
 		System.out.println("[Message received: "
-						+ message.peekString() + "]");
-		
-		message.pushInt(id);
+						+ simpleMessage.getString() + "]");
 		
 		ReceiverConfirmEvent event = new ReceiverConfirmEvent();
 		event.setMessage(message);
