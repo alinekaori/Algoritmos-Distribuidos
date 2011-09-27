@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 
 import model.ProcessList;
-import model.SimpleMessage;
 import net.sf.appia.core.AppiaEventException;
 import net.sf.appia.core.Channel;
 import net.sf.appia.core.Direction;
@@ -31,8 +30,6 @@ public class SendReceiveApplicationSession extends Session {
 	}
 
 	public void handle(Event event) {
-		System.out.println("geez. " + event.toString());
-
 		if (event instanceof ChannelInit)
 			handleChannelInit((ChannelInit) event);
 		else if (event instanceof ReceiverConfirmEvent)
@@ -45,12 +42,6 @@ public class SendReceiveApplicationSession extends Session {
 	private ProcessList processes;
 
 	private void handleChannelInit(ChannelInit init) {
-		try {
-			init.go();
-		} catch (AppiaEventException ex) {
-			ex.printStackTrace();
-		}
-
 		if (reader == null)
 			reader = new MessageReader(init.getChannel());
 
@@ -68,14 +59,21 @@ public class SendReceiveApplicationSession extends Session {
 		} catch (AppiaEventException e1) {
 			e1.printStackTrace();
 		}
+		
+		try {
+			init.go();
+		} catch (AppiaEventException ex) {
+			ex.printStackTrace();
+		}
 		System.out.println("Channel is open.");
 	}
 
 	private void handleReceiverConfirm(ReceiverConfirmEvent conf) {
+		conf.getMessage().popString();
+		
 		System.out
 				.println("[Sender: received confirmation of request "
-						+ ((SimpleMessage) conf.getMessage().popObject())
-								.getId() + "]");
+						+ conf.getMessage().peekInt() + "]");
 		try {
 			conf.go();
 		} catch (AppiaEventException ex) {
@@ -84,25 +82,32 @@ public class SendReceiveApplicationSession extends Session {
 	}
 
 	private void handleSenderRequest(SenderRequestEvent conf) {
-		Message message = conf.getMessage();
-		
-		SimpleMessage simpleMessage = (SimpleMessage) message.peekObject();
-		System.out.println("[Message received: "
-						+ simpleMessage.getString() + "]");
-		
-		ReceiverConfirmEvent event = new ReceiverConfirmEvent();
-		event.setMessage(message);
-		event.setDest(processes.getOther());
-		event.setSendSource(processes.getSelf());
-		event.setChannel(conf.getChannel());
-		event.setDir(Direction.DOWN);
-		event.setSourceSession(this);
-		
-		try {
-			event.init();
-			event.go();
-		} catch (AppiaEventException ex) {
-			ex.printStackTrace();
+		if( conf.getDir() == Direction.DOWN ){
+			try {
+				conf.go();
+			} catch (AppiaEventException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Message message = conf.getMessage();
+			
+			System.out.println("[Message received: "
+							+ message.peekString() + "]");
+			
+			ReceiverConfirmEvent event = new ReceiverConfirmEvent();
+			event.setMessage(message);
+			event.setDest(processes.getOther());
+			event.setSendSource(processes.getSelf());
+			event.setChannel(conf.getChannel());
+			event.setDir(Direction.DOWN);
+			event.setSourceSession(this);
+			
+			try {
+				event.init();
+				event.go();
+			} catch (AppiaEventException ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -135,7 +140,10 @@ public class SendReceiveApplicationSession extends Session {
 					request.setId(rid);
 
 					Message m = new Message();
-					m.pushObject(new SimpleMessage(rid, s));
+					
+					m.pushInt(rid);
+					m.pushString(s);
+					
 					request.setMessage(m);
 					request.setDest(processes.getOther());
 					request.setSendSource(processes.getSelf());
