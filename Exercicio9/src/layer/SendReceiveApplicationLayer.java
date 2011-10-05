@@ -1,7 +1,7 @@
 package layer;
 
-import event.ReceiverConfirmEvent;
-import event.SenderRequestEvent;
+import event.TrustEvent;
+import event.HeartbeatEvent;
 import session.SendReceiveApplicationSession;
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
@@ -19,8 +19,8 @@ public class SendReceiveApplicationLayer extends Layer {
   public SendReceiveApplicationLayer() {
     /* events that the protocol will create */
     evProvide = new Class[2];
-    evProvide[0] = SenderRequestEvent.class;
-    evProvide[1] = ReceiverConfirmEvent.class;
+    evProvide[0] = HeartbeatEvent.class;
+    evProvide[1] = TrustEvent.class;
 
     /*
      * events that the protocol requires to work This is a subset of the
@@ -30,8 +30,8 @@ public class SendReceiveApplicationLayer extends Layer {
 
     /* events that the protocol will accept */
     evAccept = new Class[3];
-    evAccept[0] = ReceiverConfirmEvent.class;
-    evAccept[1] = SenderRequestEvent.class;
+    evAccept[0] = TrustEvent.class;
+    evAccept[1] = HeartbeatEvent.class;
     evAccept[2] = ChannelInit.class;
   }
 
