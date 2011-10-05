@@ -49,4 +49,8 @@ public class ProcessList extends ArrayList<CustomProcess> {
 		
 		return leader;
 	}
+	
+	public CustomProcess maxRank(){
+		return null;
+	}
 }

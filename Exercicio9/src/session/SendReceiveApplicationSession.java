@@ -1,5 +1,11 @@
 package session;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,28 +51,82 @@ public class SendReceiveApplicationSession extends Session {
 	private CustomProcess leader = null;
 	private Channel channel = null;
 	
-	private long delta = 2000;
+	private long delta;
 
 	private void handleChannelInit(ChannelInit init) {
 		candidates = new ProcessList();
 		leader = processes.getSelf();
 		channel = init.getChannel();
+		delta = 2000;		
 		
-		if (timer == null){
-			timer = new Timer();
-			timer.schedule(new Timeout(), 0, delta);
+		TrustEvent event = new TrustEvent();
+		event.setLeader(leader);
+		
+		try {
+			event.setChannel(channel);
+			event.setDir(Direction.UP);
+			event.setSourceSession(this);
+			
+			event.init();
+			event.go();
+		} catch (AppiaEventException e) {
+			e.printStackTrace();
+		}
+		
+		File f = new File("epoch"+processes.getSelf().getId()+".txt");
+		if( f.exists() ){
+			 try {
+				BufferedReader input =  new BufferedReader(new FileReader(f));
+				int epoch = Integer.parseInt(input.readLine());
+				processes.getSelf().setEpoch(epoch + 1);
+				store();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				processes.getSelf().setEpoch(0);
+				store();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		HeartbeatEvent heartbeat = null;
+		Message message = null;
+		
+		for( CustomProcess process : processes ){
+			heartbeat = new HeartbeatEvent();
+			message = new Message();
+			
+			message.pushObject(processes.getSelf());
+			
+			heartbeat.setMessage(message);
+			heartbeat.setDest(process);
+			heartbeat.setSendSource(processes.getSelf());
+			
+			try {
+				heartbeat.setChannel(channel);
+				heartbeat.setDir(Direction.DOWN);
+				heartbeat.setSourceSession(this);
+				
+				heartbeat.init();
+				heartbeat.go();
+			} catch (AppiaEventException e) {
+				e.printStackTrace();
+			}
 		}
 
 		try {
 			RegisterSocketEvent rse = new RegisterSocketEvent(
-					init.getChannel(), Direction.DOWN, this);
+				init.getChannel(), Direction.DOWN, this);
 
 			InetSocketAddress address = processes.getSelf()
-					.getCompleteAddress();
-			
+				.getCompleteAddress();
+				
 			rse.port = address.getPort();
 			rse.localHost = address.getAddress();
-			System.out.println("port: " + rse.port);
+
 			rse.go();
 		} catch (AppiaEventException e1) {
 			e1.printStackTrace();
@@ -77,6 +137,12 @@ public class SendReceiveApplicationSession extends Session {
 		} catch (AppiaEventException ex) {
 			ex.printStackTrace();
 		}
+		
+		if (timer == null){
+			timer = new Timer();
+			timer.schedule(new Timeout(), 0, delta);
+		}
+		
 		System.out.println("Channel is open.");
 	}
 
@@ -121,6 +187,14 @@ public class SendReceiveApplicationSession extends Session {
 				ex.printStackTrace();
 			}
 		}
+	}
+	
+	private void store() throws IOException{
+		FileWriter outFile = new FileWriter("epoch"+processes.getSelf().getId()+".txt", false);
+		PrintWriter out = new PrintWriter(outFile);
+
+		out.print(processes.getSelf().getEpoch());
+		out.close();
 	}
 
 	public void init(ProcessList processes) {
