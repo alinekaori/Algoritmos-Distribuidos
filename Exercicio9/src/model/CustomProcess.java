@@ -9,6 +9,7 @@ public class CustomProcess {
 	private int id;
 	private boolean isSelf;
 	private InetSocketAddress completeAddress = null;
+	private int epoch;
 		
 	public CustomProcess(int id, int port, String address) {
 		super();
@@ -44,6 +45,14 @@ public class CustomProcess {
 	
 	public InetSocketAddress getCompleteAddress() {
 		return completeAddress;
+	}
+
+	public void setEpoch(int epoch) {
+		this.epoch = epoch;
+	}
+
+	public int getEpoch() {
+		return epoch;
 	}
 
 }

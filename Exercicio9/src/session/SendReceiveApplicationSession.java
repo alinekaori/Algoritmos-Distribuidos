@@ -1,12 +1,14 @@
 package session;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javax.management.timer.TimerMBean;
+
+import model.CustomProcess;
 import model.ProcessList;
 import net.sf.appia.core.AppiaEventException;
-import net.sf.appia.core.Channel;
 import net.sf.appia.core.Direction;
 import net.sf.appia.core.Event;
 import net.sf.appia.core.Layer;
@@ -38,12 +40,19 @@ public class SendReceiveApplicationSession extends Session {
 			handleSenderRequest((SenderRequestEvent) event);
 	}
 
-	private MessageReader reader = null;
+	private Timer timer = null;
 	private ProcessList processes;
+	private ProcessList candidates;
+	private CustomProcess leader = null;
+	private long delta = 2000;
 
 	private void handleChannelInit(ChannelInit init) {
-		if (reader == null)
-			reader = new MessageReader(init.getChannel());
+		candidates = new ProcessList();
+		
+		if (timer == null){
+			timer = new Timer();
+			timer.scheduleAtFixedRate(new Timeout(), 0, delta);
+		}
 
 		try {
 			RegisterSocketEvent rse = new RegisterSocketEvent(
@@ -111,68 +120,28 @@ public class SendReceiveApplicationSession extends Session {
 		}
 	}
 
-	private class MessageReader extends Thread {
-
-		public boolean ready = false;
-		public Channel channel;
-		private BufferedReader stdin = new BufferedReader(
-				new InputStreamReader(System.in));
-		private int rid = 0;
-
-		public MessageReader(Channel channel) {
-			ready = true;
-			if (this.channel == null)
-				this.channel = channel;
-			this.start();
-		}
-
-		public void run() {
-			boolean running = true;
-
-			while (running) {
-				rid++;
-				System.out.println();
-				System.out.print("[Sender](" + rid + ")> ");
-				try {
-					String s = stdin.readLine();
-
-					SenderRequestEvent request = new SenderRequestEvent();
-					request.setId(rid);
-
-					Message m = new Message();
-					
-					m.pushInt(rid);
-					m.pushString(s);
-					
-					request.setMessage(m);
-					request.setDest(processes.getOther());
-					request.setSendSource(processes.getSelf());
-					System.out.println("sending to " + 
-							processes.getOther().getCompleteAddress().getPort()+ 
-							" from " + processes.getSelf().getCompleteAddress().getPort() 
-							+ "...");
-					request.asyncGo(channel, Direction.DOWN);
-				} catch (AppiaEventException ex) {
-					ex.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				try {
-					Thread.sleep(1500);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-
-				synchronized (this) {
-					if (!ready)
-						running = false;
-				}
-			}
-		}
-	}
-
 	public void init(ProcessList processes) {
 		this.processes = processes;
+	}
+	
+	private class Timeout extends TimerTask {
+
+		@Override
+		public void run() {
+			CustomProcess newleader = candidates.selectLeader();
+			if( newleader.getId() != leader.getId() ){
+				delta += delta;
+				leader = newleader;
+				
+				// TODO trust!
+			}
+			
+			for( CustomProcess p : processes ){
+				// TODO heartbeat!
+			}
+			
+			candidates.clear();
+		}
+		
 	}
 }

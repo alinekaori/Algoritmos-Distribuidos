@@ -35,4 +35,18 @@ public class ProcessList extends ArrayList<CustomProcess> {
 		
 		return null;
 	}
+	
+	public CustomProcess selectLeader(){
+		int minEpoch = Integer.MAX_VALUE;
+		CustomProcess leader = null;
+		
+		for( CustomProcess p : this ){
+			if( minEpoch > p.getEpoch() ){
+				minEpoch = p.getEpoch();
+				leader = p;
+			}
+		}
+		
+		return leader;
+	}
 }
