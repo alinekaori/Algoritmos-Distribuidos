@@ -52,10 +52,27 @@ public class SendReceiveApplicationSession extends Session {
 	private long delta;
 
 	private void handleChannelInit(ChannelInit init) {
+		System.out.println("HANDLER INIT");
 		candidates = new ProcessList();
 		leader = processes.getSelf();
 		channel = init.getChannel();
 		delta = 2000;		
+
+		try {
+			RegisterSocketEvent rse = new RegisterSocketEvent(
+				init.getChannel(), Direction.DOWN, this);
+
+			InetSocketAddress address = processes.getSelf()
+				.getCompleteAddress();
+				
+			rse.port = address.getPort();
+			rse.localHost = address.getAddress();
+
+			rse.go();
+		} catch (AppiaEventException e1) {
+			e1.printStackTrace();
+		}
+
 		
 		TrustEvent event = new TrustEvent();
 		event.setLeader(leader);
@@ -115,20 +132,6 @@ public class SendReceiveApplicationSession extends Session {
 			}
 		}
 
-		try {
-			RegisterSocketEvent rse = new RegisterSocketEvent(
-				init.getChannel(), Direction.DOWN, this);
-
-			InetSocketAddress address = processes.getSelf()
-				.getCompleteAddress();
-				
-			rse.port = address.getPort();
-			rse.localHost = address.getAddress();
-
-			rse.go();
-		} catch (AppiaEventException e1) {
-			e1.printStackTrace();
-		}
 		
 		try {
 			init.go();
@@ -138,26 +141,14 @@ public class SendReceiveApplicationSession extends Session {
 		
 		if (timer == null){
 			timer = new Timer();
-			timer.schedule(new Timeout(), 0, delta);
+			timer.schedule(new Timeout(), delta);
 		}
 		
 		System.out.println("Channel is open.");
 	}
 
-	private void handleReceiverConfirm(TrustEvent conf) {
-		/*conf.getMessage().popString();
-		
-		System.out
-				.println("[Sender: received confirmation of request "
-						+ conf.getMessage().peekInt() + "]");*/
-		try {
-			conf.go();
-		} catch (AppiaEventException ex) {
-			ex.printStackTrace();
-		}
-	}
-
 	private void handleDeliver(HeartbeatEvent conf) {
+		
 		if( conf.getDir() == Direction.DOWN ){
 			try {
 				conf.go();
@@ -165,13 +156,15 @@ public class SendReceiveApplicationSession extends Session {
 				e.printStackTrace();
 			}
 		} else {
+			System.out.println("DELIVER");
 			CustomProcess source = (CustomProcess) conf.getMessage().popObject();
-				candidates.updateIfExists(source);
+				candidates.update(source);
 			
 		}
 	}
 	
 	private void store() throws IOException{
+		System.out.println("Armazenando");
 		FileWriter outFile = new FileWriter("epoch"+processes.getSelf().getId()+".txt", false);
 		PrintWriter out = new PrintWriter(outFile);
 
@@ -187,25 +180,29 @@ public class SendReceiveApplicationSession extends Session {
 
 		@Override
 		public void run() {
-			CustomProcess newleader = candidates.selectLeader();
-			if( newleader.getId() != leader.getId() ){
-				delta += delta;
-				leader = newleader;
-				
-				TrustEvent event = new TrustEvent();
-				event.setLeader(leader);
-				
-				try {
-					event.asyncGo(channel, Direction.UP);
-				} catch (AppiaEventException e) {
-					e.printStackTrace();
+			System.out.println("RUN DO TIMEOUT");
+			if(!candidates.isEmpty()){
+				System.out.println("PEGANDO CANDIDATOS");
+				CustomProcess newleader = candidates.selectLeader();
+				if( newleader.getId() != leader.getId() ){
+					delta += delta;
+					leader = newleader;
+					
+					TrustEvent event = new TrustEvent();
+					event.setLeader(leader);
+					
+					try {
+						event.asyncGo(channel, Direction.UP);
+					} catch (AppiaEventException e) {
+						e.printStackTrace();
+					}
 				}
 			}
-			
 			HeartbeatEvent heartbeat = null;
 			Message message = null;
 			
 			for( CustomProcess process : processes ){
+				System.out.println("Eviando HB");
 				heartbeat = new HeartbeatEvent();
 				message = new Message();
 				
@@ -223,7 +220,7 @@ public class SendReceiveApplicationSession extends Session {
 			}
 			
 			candidates.clear();
-			timer.schedule(new Timeout(), 0, delta);
+			timer.schedule(new Timeout(), delta);
 		}
 		
 	}

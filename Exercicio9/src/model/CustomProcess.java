@@ -1,10 +1,11 @@
 package model;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-public class CustomProcess {
+public class CustomProcess implements Serializable{
 	
 	private int id;
 	private boolean isSelf;
@@ -15,7 +16,7 @@ public class CustomProcess {
 		super();
 		this.id = id;
 		this.isSelf = false;
-		
+		this.epoch = 0;
 		createAddress(port, address);
 	}
 	

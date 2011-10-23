@@ -12,7 +12,7 @@ public class ProcessList extends ArrayList<CustomProcess> {
 				return p;
 			}
 		}
-		
+		System.out.println("TA VOLTANDO NULL");
 		return null;
 	}
 	
@@ -50,12 +50,17 @@ public class ProcessList extends ArrayList<CustomProcess> {
 		return leader;
 	}
 	
-	public void updateIfExists(CustomProcess source) {
+	public void update(CustomProcess source) {
+		boolean inserted = false; 
 		for(CustomProcess p : this){
 			if(p.getId() == source.getId()){
 				p.setEpoch(source.getEpoch());
-				break;
+				inserted = true;
 			}
 		}
+		if(!inserted){
+			this.add(source);
+		}
+		
 	}
 }

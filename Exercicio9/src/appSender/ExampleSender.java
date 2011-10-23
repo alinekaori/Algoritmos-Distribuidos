@@ -24,7 +24,7 @@ public class ExampleSender {
 
 	private static int PROC_ID_SENDER = 0;
 	private static int PROC_ID_RECEIVER = 1;
-	private static String ADDR_SENDER = "localhost";
+	private static String ADDR_SENDER = "192.168.1.7";
 	private static String ADDR_RECEIVER = "localhost";
 	private static int PORT_SENDER = 8080;
 	private static int PORT_RECEIVER = 9090;
