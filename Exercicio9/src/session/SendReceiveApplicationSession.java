@@ -57,7 +57,7 @@ public class SendReceiveApplicationSession extends Session {
 		candidates = new ProcessList();
 		leader = processes.getSelf();
 		channel = init.getChannel();
-		delta = 10000;		
+		delta = 2000;		
 
 		if (timer == null){
 			timer = new Timer();
@@ -176,6 +176,7 @@ public class SendReceiveApplicationSession extends Session {
 	}
 
 	public void init(ProcessList processes) {
+		System.out.println("Passei aqui: " + processes.size());
 		this.processes = processes;
 	}
 	
@@ -205,7 +206,6 @@ public class SendReceiveApplicationSession extends Session {
 			Message message = null;
 			
 			for( CustomProcess process : processes ){
-				if(!process.isSelf()){
 					System.out.println("Eviando HB: " + process.getId());
 					heartbeat = new HeartbeatEvent();
 					message = new Message();
@@ -221,7 +221,7 @@ public class SendReceiveApplicationSession extends Session {
 					} catch (AppiaEventException e) {
 						e.printStackTrace();
 					}
-				}
+				
 			}
 			
 			candidates.clear();

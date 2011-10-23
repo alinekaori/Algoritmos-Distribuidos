@@ -53,16 +53,18 @@ public class ExampleSender {
 	    Channel channel = myQoS
 	        .createUnboundChannel("UDP Simple Channel");
 	    
-	    SendReceiveApplicationSession sas = (SendReceiveApplicationSession) qos[qos.length - 1]
+	    SendReceiveApplicationSession sas = (SendReceiveApplicationSession) qos[qos.length - 2]
 	        .createSession();
 	    sas.init(buildProcessSet(args[0]));
 	    ChannelCursor cc = channel.getCursor();
 	    
 	    try {
 	      cc.top();
+	      cc.down();
 	      cc.setSession(sas);
 	    } catch (AppiaCursorException ex) {
 	      System.err.println("Unexpected exception in main. Type code:" + ex.type);
+	      ex.printStackTrace();
 	      System.exit(1);
 	    }
 	    

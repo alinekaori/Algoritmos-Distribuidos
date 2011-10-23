@@ -20,6 +20,7 @@ public class ApplicationSession extends Session {
 	}
 
 	public void handle(Event event) {
+		System.out.println("HEI EU EXISTO");
 		if (event instanceof ChannelInit)
 			handleChannelInit((ChannelInit) event);
 		else if (event instanceof TrustEvent)
@@ -28,6 +29,7 @@ public class ApplicationSession extends Session {
 
 	private void handleChannelInit(ChannelInit init) {
 		try {
+			System.out.println("AAAAAAAAAAA");
 			init.go();
 		} catch (AppiaEventException ex) {
 			ex.printStackTrace();

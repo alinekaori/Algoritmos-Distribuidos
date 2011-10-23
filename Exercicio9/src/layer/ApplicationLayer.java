@@ -1,11 +1,10 @@
 package layer;
 
-import event.TrustEvent;
-import event.HeartbeatEvent;
-import session.SendReceiveApplicationSession;
 import net.sf.appia.core.Layer;
 import net.sf.appia.core.Session;
 import net.sf.appia.core.events.channel.ChannelInit;
+import session.ApplicationSession;
+import event.TrustEvent;
 
 
 /**
@@ -33,6 +32,6 @@ public class ApplicationLayer extends Layer {
   }
 
   public Session createSession() {
-    return new SendReceiveApplicationSession(this);
+    return new ApplicationSession(this);
   }
 }
