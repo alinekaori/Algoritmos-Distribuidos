@@ -50,7 +50,12 @@ public class ProcessList extends ArrayList<CustomProcess> {
 		return leader;
 	}
 	
-	public CustomProcess maxRank(){
-		return null;
+	public void updateIfExists(CustomProcess source) {
+		for(CustomProcess p : this){
+			if(p.getId() == source.getId()){
+				p.setEpoch(source.getEpoch());
+				break;
+			}
+		}
 	}
 }

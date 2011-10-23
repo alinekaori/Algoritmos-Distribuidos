@@ -39,10 +39,8 @@ public class SendReceiveApplicationSession extends Session {
 	public void handle(Event event) {
 		if (event instanceof ChannelInit)
 			handleChannelInit((ChannelInit) event);
-		else if (event instanceof TrustEvent)
-			handleReceiverConfirm((TrustEvent) event);
 		else if (event instanceof HeartbeatEvent)
-			handleSenderRequest((HeartbeatEvent) event);
+			handleDeliver((HeartbeatEvent) event);
 	}
 
 	private Timer timer = null;
@@ -159,7 +157,7 @@ public class SendReceiveApplicationSession extends Session {
 		}
 	}
 
-	private void handleSenderRequest(HeartbeatEvent conf) {
+	private void handleDeliver(HeartbeatEvent conf) {
 		if( conf.getDir() == Direction.DOWN ){
 			try {
 				conf.go();
@@ -167,25 +165,9 @@ public class SendReceiveApplicationSession extends Session {
 				e.printStackTrace();
 			}
 		} else {
-			Message message = conf.getMessage();
+			CustomProcess source = (CustomProcess) conf.getMessage().popObject();
+				candidates.updateIfExists(source);
 			
-			System.out.println("[Message received: "
-							+ message.peekString() + "]");
-			
-			TrustEvent event = new TrustEvent();
-			/*event.setMessage(message);
-			event.setDest(processes.getOther());
-			event.setSendSource(processes.getSelf());*/
-			event.setChannel(conf.getChannel());
-			event.setDir(Direction.DOWN);
-			event.setSourceSession(this);
-			
-			try {
-				event.init();
-				event.go();
-			} catch (AppiaEventException ex) {
-				ex.printStackTrace();
-			}
 		}
 	}
 	
