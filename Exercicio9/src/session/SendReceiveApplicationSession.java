@@ -37,6 +37,7 @@ public class SendReceiveApplicationSession extends Session {
 	}
 
 	public void handle(Event event) {
+		System.out.println("Recebi um evento: " + event.toString());
 		if (event instanceof ChannelInit)
 			handleChannelInit((ChannelInit) event);
 		else if (event instanceof HeartbeatEvent)
@@ -56,8 +57,13 @@ public class SendReceiveApplicationSession extends Session {
 		candidates = new ProcessList();
 		leader = processes.getSelf();
 		channel = init.getChannel();
-		delta = 2000;		
+		delta = 10000;		
 
+		if (timer == null){
+			timer = new Timer();
+			timer.schedule(new Timeout(), delta);
+		}
+		
 		try {
 			RegisterSocketEvent rse = new RegisterSocketEvent(
 				init.getChannel(), Direction.DOWN, this);
@@ -76,7 +82,7 @@ public class SendReceiveApplicationSession extends Session {
 		
 		TrustEvent event = new TrustEvent();
 		event.setLeader(leader);
-		
+		System.out.println(leader.getId());
 		try {
 			event.setChannel(channel);
 			event.setDir(Direction.UP);
@@ -139,10 +145,6 @@ public class SendReceiveApplicationSession extends Session {
 			ex.printStackTrace();
 		}
 		
-		if (timer == null){
-			timer = new Timer();
-			timer.schedule(new Timeout(), delta);
-		}
 		
 		System.out.println("Channel is open.");
 	}
@@ -150,16 +152,17 @@ public class SendReceiveApplicationSession extends Session {
 	private void handleDeliver(HeartbeatEvent conf) {
 		
 		if( conf.getDir() == Direction.DOWN ){
+			System.out.println("DELIVER: DOWN");
 			try {
 				conf.go();
 			} catch (AppiaEventException e) {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("DELIVER");
+			System.out.println("DELIVER: UP");
 			CustomProcess source = (CustomProcess) conf.getMessage().popObject();
 				candidates.update(source);
-			
+			System.out.println("DELIVER: " + source.getId());
 		}
 	}
 	
@@ -190,7 +193,7 @@ public class SendReceiveApplicationSession extends Session {
 					
 					TrustEvent event = new TrustEvent();
 					event.setLeader(leader);
-					
+					System.out.println(leader.getId());
 					try {
 						event.asyncGo(channel, Direction.UP);
 					} catch (AppiaEventException e) {
@@ -202,20 +205,22 @@ public class SendReceiveApplicationSession extends Session {
 			Message message = null;
 			
 			for( CustomProcess process : processes ){
-				System.out.println("Eviando HB");
-				heartbeat = new HeartbeatEvent();
-				message = new Message();
-				
-				message.pushObject(processes.getSelf());
-				
-				heartbeat.setMessage(message);
-				heartbeat.setDest(process);
-				heartbeat.setSendSource(processes.getSelf());
-				
-				try {
-					heartbeat.asyncGo(channel, Direction.DOWN);
-				} catch (AppiaEventException e) {
-					e.printStackTrace();
+				if(!process.isSelf()){
+					System.out.println("Eviando HB: " + process.getId());
+					heartbeat = new HeartbeatEvent();
+					message = new Message();
+					
+					message.pushObject(processes.getSelf());
+					
+					heartbeat.setMessage(message);
+					heartbeat.setDest(process);
+					heartbeat.setSendSource(processes.getSelf());
+					
+					try {
+						heartbeat.asyncGo(channel, Direction.DOWN);
+					} catch (AppiaEventException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			

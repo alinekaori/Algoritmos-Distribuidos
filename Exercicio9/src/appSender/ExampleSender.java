@@ -1,6 +1,7 @@
 package appSender;
 
 
+import layer.ApplicationLayer;
 import layer.SendReceiveApplicationLayer;
 import model.CustomProcess;
 import model.ProcessList;
@@ -24,8 +25,8 @@ public class ExampleSender {
 
 	private static int PROC_ID_SENDER = 0;
 	private static int PROC_ID_RECEIVER = 1;
-	private static String ADDR_SENDER = "192.168.1.7";
-	private static String ADDR_RECEIVER = "localhost";
+	private static String ADDR_SENDER = "192.168.1.2";
+	private static String ADDR_RECEIVER = "192.168.1.7";
 	private static int PORT_SENDER = 8080;
 	private static int PORT_RECEIVER = 9090;
 	
@@ -37,7 +38,7 @@ public class ExampleSender {
 		}
 		
 	    /* Create layers and put them on a array */
-	    Layer[] qos = {new UdpSimpleLayer(), new SendReceiveApplicationLayer()};
+	    Layer[] qos = {new UdpSimpleLayer(), new SendReceiveApplicationLayer(), new ApplicationLayer()};
 
 	    /* Create a QoS */
 	    QoS myQoS = null;

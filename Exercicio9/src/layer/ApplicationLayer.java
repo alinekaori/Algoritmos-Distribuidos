@@ -13,15 +13,13 @@ import net.sf.appia.core.events.channel.ChannelInit;
  * 
  * @author akt & kcg
  */
-public class SendReceiveApplicationLayer extends Layer {
+public class ApplicationLayer extends Layer {
 
   /** Creates a new instance of PrintApplicationLayer */
-  public SendReceiveApplicationLayer() {
+  public ApplicationLayer() {
     /* events that the protocol will create */
-    evProvide = new Class[2];
-    evProvide[0] = HeartbeatEvent.class;
-    evProvide[1] = TrustEvent.class;
-
+    evProvide = new Class[0];
+    
     /*
      * events that the protocol requires to work This is a subset of the
      * accepted events.
@@ -30,7 +28,7 @@ public class SendReceiveApplicationLayer extends Layer {
 
     /* events that the protocol will accept */
     evAccept = new Class[2];
-    evAccept[0] = HeartbeatEvent.class;
+    evAccept[0] = TrustEvent.class;
     evAccept[1] = ChannelInit.class;
   }
 
